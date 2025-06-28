@@ -11,19 +11,19 @@ import {
   NotificationType, 
   ProjectStatus, 
   CompensationModel 
-} from '../types';
+} from '../types.ts';
 import { 
   getProjectById, 
   sendMessage, 
   uploadFile, 
   updateApplicationStatus, 
   updateMilestoneStatus 
-} from '../services/apiService';
-import { useAuth } from '../hooks/useAuth';
-import { useNotifications } from '../hooks/useNotifications';
-import Spinner from '../components/ui/Spinner';
-import Button from '../components/ui/Button';
-import ApplicationForm from '../components/applications/ApplicationForm';
+} from '../services/apiService.ts';
+import { useAuth } from '../hooks/useAuth.ts';
+import { useNotifications } from '../hooks/useNotifications.ts';
+import Spinner from '../components/ui/Spinner.tsx';
+import Button from '../components/ui/Button.tsx';
+import ApplicationForm from '../components/applications/ApplicationForm.tsx';
 import { 
   Briefcase, 
   CalendarDays, 
@@ -38,9 +38,9 @@ import {
   UserX, 
   Settings 
 } from 'lucide-react';
-import MilestoneItem from '../components/projects/MilestoneItem';
-import { supabase } from '../lib/supabaseClient';
-import Textarea from '../components/ui/Textarea';
+import MilestoneItem from '../components/projects/MilestoneItem.tsx';
+import { supabase } from '../lib/supabaseClient.ts';
+import Textarea from '../components/ui/Textarea.tsx';
 
 const ProjectDetailsViewerPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -82,11 +82,12 @@ const ProjectDetailsViewerPage: React.FC = () => {
     }
 
     const owner = user.id === project.posted_by_user_id;
-    const acceptedApp = project.applications?.find(
+    // Use the applications state, which is the source of truth from the initial fetch
+    const acceptedApp = applications.find(
       app => app.contributor_user_id === user.id && 
       app.status === ApplicationStatus.ACCEPTED
     );
-    const application = project.applications?.find(
+    const application = applications.find(
       app => app.contributor_user_id === user.id
     );
 
@@ -99,7 +100,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
       canManage: owner,
       viewerApplicationStatus: application?.status
     };
-  }, [user, project]);
+  }, [user, project, applications]);
 
   const fetchProjectDetails = useCallback(async () => {
     if (!projectId) return;
@@ -153,39 +154,49 @@ const ProjectDetailsViewerPage: React.FC = () => {
   useEffect(() => {
     if (!projectId || !canChat) return;
 
-    const channel = supabase
-      .channel(`project-chat-${projectId}`)
-      .on<Message>(
-        'postgres_changes',
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'messages', 
-          filter: `project_id=eq.${projectId}` 
-        },
-        async (payload) => {
-          try {
-            // Check if message already exists to prevent duplicates
-            if (messages.some(m => m.id === payload.new.id)) return;
+    const channel = supabase.channel(`project-chat-${projectId}`);
 
-            const { data: senderData, error: senderError } = await supabase
-              .from('users')
-              .select('id, name, profile_photo_url')
-              .eq('id', payload.new.sender_user_id)
-              .single();
+    const handleNewMessage = async (payload: any) => {
+      // The payload for an INSERT only contains the direct row data.
+      // We must fetch the sender_user details to render the UI correctly.
+      try {
+        const { data: senderData, error: senderError } = await supabase
+          .from('users')
+          .select('id, name, profile_photo_url')
+          .eq('id', payload.new.sender_user_id)
+          .single();
 
-            const fullMessage = { 
-              ...payload.new, 
-              sender_user: senderError ? undefined : senderData 
-            } as Message;
-
-            setMessages(prev => [...prev, fullMessage]);
-          } catch (err) {
-            console.error("Error processing new message:", err);
-            // Fallback to basic message if sender fetch fails
-            setMessages(prev => [...prev, payload.new as Message]);
-          }
+        if (senderError) {
+          console.error("Could not fetch sender details for new message:", senderError);
         }
+
+        const fullMessage: Message = {
+          ...payload.new,
+          sender_user: senderData || undefined,
+        };
+
+        setMessages((prevMessages) => {
+          // Prevent duplicates if message was already added optimistically
+          if (prevMessages.some(m => m.id === fullMessage.id)) {
+            return prevMessages;
+          }
+          return [...prevMessages, fullMessage];
+        });
+      } catch (err) {
+        console.error("Error processing new message:", err);
+      }
+    };
+
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `project_id=eq.${projectId}`
+        },
+        handleNewMessage
       )
       .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
@@ -202,10 +213,11 @@ const ProjectDetailsViewerPage: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [projectId, canChat, addNotification, messages]);
+  }, [projectId, canChat, addNotification]);
+
 
   const handleSendMessage = async () => {
-    if (!projectId || (!newMessage.trim() && !attachment) return;
+    if (!projectId || (!newMessage.trim() && !attachment)) return;
     if (!user) {
       addNotification('You must be logged in to send messages.', NotificationType.ERROR);
       return;
@@ -225,8 +237,17 @@ const ProjectDetailsViewerPage: React.FC = () => {
         attachmentUrl = publicUrl;
       }
       
-      const { error } = await sendMessage(projectId, newMessage.trim(), attachmentUrl);
-      if (error) throw error;
+      const response = await sendMessage(projectId, newMessage.trim(), attachmentUrl);
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      // **FIX:** Manually add the new message to state for the sender.
+      // The realtime listener won't fire for the client that sent the message.
+      if (response.data) {
+        setMessages(prev => [...prev, response.data]);
+      }
       
       setNewMessage('');
       setAttachment(null);
@@ -241,7 +262,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
   };
 
   const handleApplicationStatusUpdate = async (app: Application, newStatus: ApplicationStatus) => {
-    if (!isOwner || !project) return;
+    if (!isOwner || !project || !project.posted_by_user_id) return;
 
     try {
       const { error } = await updateApplicationStatus(
@@ -270,12 +291,13 @@ const ProjectDetailsViewerPage: React.FC = () => {
       `Initiating funding for milestone: "${milestone.description}" for $${milestone.amount}`,
       NotificationType.INFO
     );
+    // Here you would integrate with a payment service like Stripe
   };
 
   const handleMarkMilestoneComplete = async (milestoneId: string) => {
-    if (!isOwner || !project || !projectId) return;
+    if (!isOwner || !project || !projectId || !project.posted_by_user_id) return;
 
-    const acceptedContributorIds = project.applications
+    const acceptedContributorIds = applications
       ?.filter(app => app.status === ApplicationStatus.ACCEPTED)
       .map(app => app.contributor_user_id) || [];
 
@@ -371,7 +393,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
             </div>
             
             {/* Skills */}
-            {project.required_skills?.length > 0 && (
+            {project.required_skills && project.required_skills.length > 0 && (
               <div>
                 <h3 className="text-md font-semibold text-gray-700 mb-2">Required Skills</h3>
                 <div className="flex flex-wrap gap-2">
@@ -385,7 +407,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
             )}
 
             {/* Deliverables */}
-            {project.deliverables?.length > 0 && (
+            {project.deliverables && project.deliverables.length > 0 && (
               <div>
                 <h3 className="text-md font-semibold text-gray-700 mb-2">Deliverables</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1">
@@ -402,7 +424,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
             )}
 
             {/* Milestones */}
-            {project.milestones?.length > 0 && (
+            {project.milestones && project.milestones.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Project Milestones</h2>
                 <div className="space-y-3">
@@ -452,11 +474,6 @@ const ProjectDetailsViewerPage: React.FC = () => {
             {/* Management Buttons */}
             {canManage && project.id && (
               <div className="space-y-3">
-                <Link to={`/projects/${project.id}/manage`}> 
-                  <Button variant="secondary" size="lg" className="w-full" leftIcon={<Settings size={18}/>}>
-                    Manage Applications
-                  </Button>
-                </Link>
                 <Link to={`/projects/${project.id}/edit`}>
                   <Button variant="outline" size="lg" className="w-full" leftIcon={<Edit3 size={18}/>}>
                     Edit Project Details
@@ -560,7 +577,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
                         className="text-red-600 hover:text-red-800"
                         aria-label="Remove attachment"
                       >
-                        &times;
+                        ×
                       </button>
                     </span>
                   )}
@@ -569,7 +586,7 @@ const ProjectDetailsViewerPage: React.FC = () => {
                   onClick={handleSendMessage} 
                   disabled={(!newMessage.trim() && !attachment) || isSendingMessage}
                   leftIcon={<Send size={16} />}
-                  loading={isSendingMessage}
+                  isLoading={isSendingMessage}
                 >
                   Send
                 </Button>
