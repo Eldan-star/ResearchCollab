@@ -1,5 +1,4 @@
-
-import React, { TextareaHTMLAttributes } from 'react';
+import React, { TextareaHTMLAttributes, forwardRef } from 'react';
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
@@ -7,7 +6,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   containerClassName?: string;
 }
 
-const Textarea: React.FC<TextareaProps> = ({ label, name, error, className = '', containerClassName = '', ...props }) => {
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({ label, name, error, className = '', containerClassName = '', ...props }, ref) => {
   const baseStyles = 'block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none sm:text-sm';
   const normalBorder = 'border-gray-300 focus:ring-primary focus:border-primary';
   const errorBorder = 'border-red-500 focus:ring-red-500 focus:border-red-500';
@@ -22,6 +21,7 @@ const Textarea: React.FC<TextareaProps> = ({ label, name, error, className = '',
       <textarea
         id={name}
         name={name}
+        ref={ref}
         className={`${baseStyles} ${error ? errorBorder : normalBorder} ${className}`}
         rows={4}
         {...props}
@@ -29,6 +29,7 @@ const Textarea: React.FC<TextareaProps> = ({ label, name, error, className = '',
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
-};
+});
 
+Textarea.displayName = 'Textarea';
 export default Textarea;

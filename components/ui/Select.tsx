@@ -1,14 +1,13 @@
-
-import React, { SelectHTMLAttributes, ReactNode } from 'react';
+import React, { SelectHTMLAttributes, ReactNode, forwardRef } from 'react';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
-  children: ReactNode; // <option> elements
+  children: ReactNode;
   containerClassName?: string;
 }
 
-const Select: React.FC<SelectProps> = ({ label, name, error, children, className = '', containerClassName = '', ...props }) => {
+const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, name, error, children, className = '', containerClassName = '', ...props }, ref) => {
   const baseStyles = 'block w-full pl-3 pr-10 py-2 text-base border rounded-md focus:outline-none sm:text-sm';
   const normalBorder = 'border-gray-300 focus:ring-primary focus:border-primary';
   const errorBorder = 'border-red-500 focus:ring-red-500 focus:border-red-500';
@@ -23,6 +22,7 @@ const Select: React.FC<SelectProps> = ({ label, name, error, children, className
       <select
         id={name}
         name={name}
+        ref={ref}
         className={`${baseStyles} ${error ? errorBorder : normalBorder} ${className}`}
         {...props}
       >
@@ -31,6 +31,7 @@ const Select: React.FC<SelectProps> = ({ label, name, error, children, className
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
-};
+});
 
+Select.displayName = 'Select';
 export default Select;

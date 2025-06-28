@@ -3,9 +3,8 @@
 // In a Next.js app, this would be process.env.NEXT_PUBLIC_UNIVERSITY_EMAIL_DOMAINS
 // For a simple SPA, you might need a different way to set this or hardcode for demo.
 // For this example, we'll simulate it being available.
-const universityEmailDomainsFromEnv = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_UNIVERSITY_EMAIL_DOMAINS)
-  ? process.env.NEXT_PUBLIC_UNIVERSITY_EMAIL_DOMAINS
-  : "aau.edu.et"; // Updated default domain
+// Vite exposes environment variables from .env on import.meta.env
+const universityEmailDomainsFromEnv = import.meta.env.VITE_UNIVERSITY_EMAIL_DOMAINS || "aau.edu.et";
 
 export const UNIVERSITY_EMAIL_DOMAINS: string[] = universityEmailDomainsFromEnv.split(',').map(domain => domain.trim());
 

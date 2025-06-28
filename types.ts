@@ -1,4 +1,3 @@
-// types.ts
 import type { User as SupabaseUser } from '@supabase/gotrue-js';
 import { z } from 'zod';
 
@@ -38,7 +37,7 @@ export enum CompensationModel {
 }
 
 export interface UserProfile {
-  id: string; 
+  id: string;
   email: string;
   role: UserRole;
   name: string;
@@ -46,7 +45,7 @@ export interface UserProfile {
   bio?: string;
   skills?: string[];
   profile_photo_url?: string;
-  is_anonymous?: boolean; 
+  is_anonymous?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -66,16 +65,15 @@ export interface Milestone {
 export const MilestoneSchema = z.object({
   description: z.string().min(1, "Description is required"),
   amount: z.number().min(0, "Amount must be non-negative"),
-  due_date: z.string().optional(), 
+  due_date: z.string().optional(),
 });
 
 export type MilestoneInput = z.infer<typeof MilestoneSchema>;
 
-
 export interface Project {
   id: string;
   posted_by_user_id: string;
-  posted_by_user?: UserProfile; 
+  posted_by_user?: UserProfile;
   title: string;
   description: string;
   required_skills?: string[];
@@ -89,7 +87,7 @@ export interface Project {
   end_date?: string;
   status: ProjectStatus;
   milestones?: Milestone[];
-  applications?: Application[]; 
+  applications?: Application[];
   created_at?: string;
   updated_at?: string;
 }
@@ -99,11 +97,19 @@ export const ProjectSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   required_skills: z.array(z.string()).optional(),
   estimated_hours: z.number().int().positive().optional(),
-  deliverables: z.array(z.string()).optional(),
+  deliverables: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        return val.split('\n').map(s => s.trim()).filter(Boolean);
+      }
+      return val;
+    },
+    z.array(z.string()).optional()
+  ),
   compensation_model: z.nativeEnum(CompensationModel),
   stipend_amount: z.number().min(0).optional(),
   confidentiality_agreement_required: z.boolean().default(false),
-  application_deadline: z.string().optional(), 
+  application_deadline: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   milestones: z.array(MilestoneSchema).optional().default([]),
@@ -111,13 +117,12 @@ export const ProjectSchema = z.object({
 
 export type ProjectInput = z.infer<typeof ProjectSchema>;
 
-
 export interface Application {
   id: string;
   project_id: string;
-  project?: Pick<Project, 'id' | 'title'>; 
+  project?: Pick<Project, 'id' | 'title'>;
   contributor_user_id: string;
-  contributor_user?: UserProfile; 
+  contributor_user?: UserProfile;
   proposal_text: string;
   availability?: string;
   proposed_rate?: number;
@@ -136,17 +141,17 @@ export const ApplicationSchema = z.object({
   cv_url: z.string().url().optional().or(z.literal('')),
   linkedin_url: z.string().url().optional().or(z.literal('')),
 });
-export type ApplicationInput = z.infer<typeof ApplicationSchema>;
 
+export type ApplicationInput = z.infer<typeof ApplicationSchema>;
 
 export interface Message {
   id: string;
   project_id: string;
   sender_user_id: string;
-  sender_user?: Pick<UserProfile, 'id' | 'name' | 'profile_photo_url'>; 
+  sender_user?: Pick<UserProfile, 'id' | 'name' | 'profile_photo_url'>;
   message_text: string;
   attachment_url?: string;
-  created_at: string; 
+  created_at: string;
 }
 
 export interface Rating {
@@ -154,9 +159,9 @@ export interface Rating {
   project_id: string;
   rated_by_user_id: string;
   rated_user_id: string;
-  communication_rating?: number; 
-  quality_rating?: number; 
-  timeliness_rating?: number; 
+  communication_rating?: number;
+  quality_rating?: number;
+  timeliness_rating?: number;
   comments?: string;
   created_at?: string;
 }
@@ -169,7 +174,7 @@ export interface ApiErrorResponse {
 
 export interface SignupRequest {
   email: string;
-  password_hash: string; 
+  password_hash: string;
   name: string;
   institution: string;
   role: UserRole;
@@ -179,8 +184,8 @@ export interface SignupRequest {
 
 export type AppUser = SupabaseUser & { user_metadata: UserProfile };
 
-// --- START: Added/Updated for In-App Persistent Notifications ---
-export enum NotificationTypeEnum { // For DB notifications, distinct from Toast NotificationType
+// Notification System
+export enum NotificationTypeEnum {
   NEW_APPLICATION = 'new_application',
   APPLICATION_STATUS_UPDATE = 'application_status_update',
   PROJECT_MILESTONE_UPDATE = 'project_milestone_update',
@@ -189,9 +194,9 @@ export enum NotificationTypeEnum { // For DB notifications, distinct from Toast 
   GENERIC_SYSTEM_UPDATE = 'generic_system_update',
 }
 
-export interface AppNotification { // For DB notifications
+export interface AppNotification {
   id: string;
-  user_id: string; 
+  user_id: string;
   type: NotificationTypeEnum;
   message: string;
   link?: string;
@@ -201,10 +206,8 @@ export interface AppNotification { // For DB notifications
   related_milestone_id?: string;
   created_at: string;
 }
-// --- END: Added/Updated for In-App Persistent Notifications ---
 
-
-// For Toast system (already existing in your file)
+// Toast Notifications
 export enum NotificationType {
   SUCCESS = 'success',
   ERROR = 'error',
