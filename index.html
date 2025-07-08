@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University Research Collaboration Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#007A7A', // Tealish
+              light: '#00A0A0',
+              dark: '#005050',
+            },
+            secondary: {
+              DEFAULT: '#FFB81C', // Amber
+              light: '#FFD066',
+              dark: '#D99P00',
+            },
+            accent: {
+              DEFAULT: '#4A90E2', // Bright Blue
+            },
+            neutral: {
+              light: '#F8F9FA',
+              DEFAULT: '#E9ECEF',
+              dark: '#343A40',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+</head>
+<body class="bg-neutral-light">
+  <div id="root"></div>
+  <script type="module" src="./src/index.tsx"></script>
+</body>
+</html>
