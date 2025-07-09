@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>University Research Collaboration Platform</title>
+  <!-- <link rel="manifest" href="/manifest.json" /> --> <!-- vite-plugin-pwa will handle this -->
+  <meta name="theme-color" content="#007A7A" /> <!-- This can be kept or also managed by the plugin via vite.config.ts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -39,5 +41,6 @@
 <body class="bg-neutral-light">
   <div id="root"></div>
   <script type="module" src="./src/index.tsx"></script>
+  <!-- Script for service worker registration is removed as vite-plugin-pwa handles it -->
 </body>
 </html>

@@ -1,6 +1,7 @@
 // App.tsx
 import React, { Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { OfflineNotification } from './components/ui/OfflineNotification'; // Added import
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import { useAuth } from './hooks/useAuth.ts';
 import { NotificationProvider } from './contexts/NotificationContext.tsx'; // For Toasts
@@ -50,6 +51,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
 const AppContent: React.FC = () => {
   return (
     <HashRouter>
+      <OfflineNotification /> {/* Added OfflineNotification component */}
       <Navbar />
       <main className="flex-grow">
         <Suspense fallback={<div className="flex justify-center items-center h-[calc(100vh-4rem)]"><Spinner size="lg" /></div>}>
