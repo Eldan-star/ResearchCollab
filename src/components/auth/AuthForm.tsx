@@ -85,7 +85,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isSignUp = false }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-8 shadow-xl rounded-lg max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-center text-primary">
-        {isSignUp ? 'Create an Account' : 'Login to UniCollab'}
+        {isSignUp ? 'Create an Account' : 'Login to ResearchCollab'}
       </h2>
       
       {isSignUp && (

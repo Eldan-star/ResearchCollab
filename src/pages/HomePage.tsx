@@ -110,7 +110,7 @@ const HomePage: React.FC = () => {
       {/* How it Works Section */}
       <section className="py-16 bg-neutral-light text-neutral-dark">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-semibold text-center mb-12 text-primary">How UniCollab Works</h2>
+          <h2 className="text-3xl font-semibold text-center mb-12 text-primary">How ResearchCollab Works</h2>
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="p-6 bg-white rounded-lg shadow-lg">
               <div className="bg-primary text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">1</div>
@@ -133,7 +133,7 @@ const HomePage: React.FC = () => {
       
       {/* Footer (Simplified) */}
       <footer className="py-8 text-center text-primary-light bg-primary-dark">
-        <p>&copy; {new Date().getFullYear()} UniCollab Platform. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} ResearchCollab Platform. All rights reserved.</p>
       </footer>
     </div>
   );

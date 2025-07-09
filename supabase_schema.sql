@@ -514,7 +514,7 @@ GRANT INSERT, UPDATE, DELETE ON TABLE public.ratings TO authenticated;
 INSERT INTO public.users (id, email, role, name, institution, bio, skills, is_anonymous) VALUES
 ('REPLACE_WITH_AUTH_USER_ID_PROF_1', 'prof1@aau.edu.et', 'research_lead', 'Dr. Addis Alemayehu', 'Addis Ababa University', 'Expert in Computational Linguistics.', '{"NLP", "Machine Learning", "Python"}', FALSE),
 ('REPLACE_WITH_AUTH_USER_ID_STUDENT_1', 'student1@aau.edu.et', 'contributor', 'Beshatu Lemma', 'Addis Ababa University', 'Final year CS student, eager to learn.', '{"Java", "Web Development"}', FALSE),
-('REPLACE_WITH_AUTH_USER_ID_ADMIN_1', 'admin@aau.edu.et', 'admin', 'Platform Admin', 'UniCollab Ops', 'System administrator for UniCollab.', '{}', FALSE);
+('REPLACE_WITH_AUTH_USER_ID_ADMIN_1', 'admin@aau.edu.et', 'admin', 'Platform Admin', 'ResearchCollab Ops', 'System administrator for ResearchCollab.', '{}', FALSE);
 
 INSERT INTO public.projects (posted_by_user_id, title, description, required_skills, compensation_model, status, application_deadline) VALUES
 ((SELECT id FROM public.users WHERE email = 'prof1@aau.edu.et'), 'Amharic Sentiment Analysis Model', 'Develop a state-of-the-art sentiment analysis tool for Amharic text using deep learning.', '{"Python", "TensorFlow", "NLP", "Amharic"}', 'stipend', 'open', '2024-09-30'),
