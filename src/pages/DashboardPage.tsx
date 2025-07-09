@@ -11,12 +11,6 @@ import { PlusCircle, Briefcase, Settings as AdminIcon, Search as BrowseIcon } fr
 
 const DashboardPage: React.FC = () => {
   const { user, isResearchLead, isContributor, isAdmin, loading: authLoading } = useAuth(); // Added authLoading
-  // --- START OF ADDED LOGS ---
-  console.log("Dashboard User:", JSON.stringify(user, null, 2));
-  console.log("Dashboard isResearchLead:", isResearchLead);
-  console.log("Dashboard isContributor:", isContributor);
-  console.log("Dashboard isAdmin:", isAdmin);
-  // --- END OF ADDED LOGS ---
 
   const [projects, setProjects] = useState<Project[]>([]); // For "Recent Open Projects"
   const [myApplications, setMyApplications] = useState<Application[]>([]);
