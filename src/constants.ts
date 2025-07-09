@@ -12,6 +12,6 @@ export const DEFAULT_PROFILE_PHOTO_URL = "https://picsum.photos/200"; // Placeho
 export const MAX_FILE_UPLOAD_SIZE_MB = 5;
 export const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
-export const APP_NAME = "UniCollab";
+export const APP_NAME = "ResearchCollab";
 
 export const PAGINATION_PAGE_SIZE = 10;
