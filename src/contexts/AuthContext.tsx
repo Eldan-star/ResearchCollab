@@ -61,10 +61,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [fetchUserProfile]);
 
   const validateUniversityEmail = (email: string): boolean => {
-    if (UNIVERSITY_EMAIL_DOMAINS.length === 0 || UNIVERSITY_EMAIL_DOMAINS[0] === '') return true;
     const domain = email.substring(email.lastIndexOf('@') + 1);
-    return UNIVERSITY_EMAIL_DOMAINS.includes(domain);
-  };
+    if (UNIVERSITY_EMAIL_DOMAINS.length > 0 && UNIVERSITY_EMAIL_DOMAINS[0] !== '') {
+        return UNIVERSITY_EMAIL_DOMAINS.includes(domain);
+    }
+    return true;
+};
 
   const signUp = async (params: { email: string; password_hash: string; name: string; institution: string; role: UserRole; is_anonymous?: boolean; }) => {
     if (!validateUniversityEmail(params.email)) {

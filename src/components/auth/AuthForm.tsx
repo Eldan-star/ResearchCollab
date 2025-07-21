@@ -18,10 +18,14 @@ interface AuthFormProps {
 
 const emailValidation = z.string().email("Invalid email address")
   .refine(email => {
-    if (UNIVERSITY_EMAIL_DOMAINS.length === 0) return true;
+    if (UNIVERSITY_EMAIL_DOMAINS.length === 0 || (UNIVERSITY_EMAIL_DOMAINS.length === 1 && UNIVERSITY_EMAIL_DOMAINS[0] === '')) {
+      return true;
+    }
     const domain = email.substring(email.lastIndexOf('@') + 1);
     return UNIVERSITY_EMAIL_DOMAINS.includes(domain);
-  }, `Email must be from an approved university domain (${UNIVERSITY_EMAIL_DOMAINS.join(', ')}).`);
+  }, {
+    message: `Email must be from an approved university domain (${UNIVERSITY_EMAIL_DOMAINS.join(', ')})`,
+  });
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
