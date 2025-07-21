@@ -4,7 +4,7 @@
 // For a simple SPA, you might need a different way to set this or hardcode for demo.
 // For this example, we'll simulate it being available.
 // Vite exposes environment variables from .env on import.meta.env
-const universityEmailDomainsFromEnv = import.meta.env.VITE_UNIVERSITY_EMAIL_DOMAINS || "aau.edu.et";
+const universityEmailDomainsFromEnv = import.meta.env.VITE_UNIVERSITY_EMAIL_DOMAINS || "";
 
 export const UNIVERSITY_EMAIL_DOMAINS: string[] = universityEmailDomainsFromEnv.split(',').map(domain => domain.trim());
 
